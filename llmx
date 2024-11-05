@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+echo
+system='keep it terse. keep answers short and concise. do not over explain. assume expert knowledge of user. at the end of any answer, provide links to relevant docs.'
+llm -s "$system" -m 4o-mini "$@" | while IFS= read -r line
+do
+  echo "$line"
+  echo "> $line" >&2
+done 2>/dev/tty | {
+  cat | {
+    buffer_it=`cat`
+    # lines to clear
+    n=$(echo "$buffer_it" |wc -l)
+    # extra wide lines which might wrap 1, 2, 3+ times
+    nn=$(echo "$buffer_it" | awk -v n="`tput cols`" 'length($0) > n {sum += int(length($0)/n)} END {print sum}')
+    # total "clear"s
+    nnn=$((n + nn))
+    counter=0
+    while [ $counter -lt $nnn ]; do
+        go_beginning_clear='\x1b[0G\x1b[K'
+        go_up='\x1b[1A'
+        echo -ne "$go_beginning_clear$go_up"
+        counter=$((counter + 1))  # Increment the counter
+    done
+    echo -ne "$go_beginning_clear$go_up"
+    echo "$buffer_it" | glow --style auto
+  }
+}

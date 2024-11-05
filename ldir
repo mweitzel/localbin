@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd `cat ~/.saved-directory`
+test -f .pwdrc && source .pwdrc

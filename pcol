@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+test "$1" || {
+  echo
+  echo "usage:"
+  echo "  $0 3 # to print column 3"
+  echo
+  echo "*note this wraps awk, so index at 1*"
+  echo
+  exit 1
+}
+
+foo=""
+for var in "$@"
+do
+  re='^[0-9]+$'
+  if [[ "$var" =~ $re ]]
+  then
+    var="\$$var"
+  else
+    var='"'"$var"'"'
+  fi
+  foo="$foo $var "' " "'
+done
+
+foo=`echo $foo|sed 's/_/\$/g'`
+
+awk "{print $foo}"
